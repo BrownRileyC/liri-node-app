@@ -3,8 +3,8 @@ require("dotenv").config();
 var Spotify = require('node-spotify-api');
 var axios = require('axios');
 var moment = require('moment');
-
 var keys = require('./keys.js');
+var fs = require('fs');
 
 var spotify = new Spotify(keys.spotify);
 
@@ -20,18 +20,26 @@ var args = process.argv;
 
 var concertCheck = function (band) {
     band = band.replace(/ /g, '+')
+    band = band.replace(/"/g, "")
+    console.log(band);
     var axiosURL = "https://rest.bandsintown.com/artists/" + band + "/events?app_id=codingbootcamp";
+    console.log(axiosURL);
     axios
         .get(axiosURL)
         .then(function (response) {
             var events = response.data
-            console.log('There are ' + events.length + ' events found');
+            if (events.length > 1){
+            console.log('We found ' + events.length + ' events');
+            } else {
+                console.log('We found ' + events.length + ' event');
+            };
             for (var i = 0; i < events.length; i++) {
                 console.log('Venue name: ' + events[i].venue.name);
                 console.log('Venue Location: ' + events[i].venue.city);
                 var dateString = moment(JSON.stringify(events[i].datetime), 'YYYY-MM-DDTHH:mm:ss');
                 var displayString = dateString.format('MM/DD/YYYY')
                 console.log('Event date: ' + displayString);
+                console.log("===============================================")
             }
         })
         .catch(function (error) {
@@ -77,7 +85,8 @@ var songCheck = function (song) {
                     } else {
                         console.log("Here's a link to a preview of the song: " + tracks.items[i].preview_url);
                     }
-                }
+                    console.log("===============================================")
+                } 
             };
         })
         .catch(function (error) {
@@ -99,12 +108,58 @@ var songCheck = function (song) {
 // Return Title of movie, Year of Release, IMDB rating, Rotten Tomatoes Rating, Country of Origin, Language, Plot summary, Actors.  Have a default response for no return. 
 // Use Trilogy API key
 
-
+var checkMovie = function (movie) {
+    movie = movie.replace(/ /g, '+')
+    var axiosURL = "http://www.omdbapi.com/?apikey=trilogy&t=" + movie + "&type=movie";
+    axios
+        .get(axiosURL)
+        .then(function (response) {
+            var data = response.data;
+            console.log(data.Title);
+            console.log("Released in " + data.Released + "\r\nRated " + data.imdbRating + " on imdb\r\nand " + data.Ratings[1].Value + " from Rotten Tomatoes\r\nThe film is from " + data.Country + " and is in " + data.Language + "\r\n" + data.Plot + "\r\nIt features " + data.Actors);
+            console.log(data.Ratings)
+        })
+        .catch(function (error) {
+            if (error.response) {
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            } else if (error.request) {
+                console.log(error.request);
+            } else {
+                console.log("Error", error.message);
+            }
+            console.log(error.config);
+        })
+}
 
 //  do-what-it-says
 // FS
 // This should grab whatever command is in the random.txt and run that command
 
+var checkPreset = function () {
+    fs.readFile('random.txt', 'utf8', function (error, data) {
+        if (error) {
+            console.log(error);
+        }
+        var presetArray = data.split(', ');
+
+        console.log(presetArray[0]==='spotify-this-song');
+        switch (presetArray[0]) {
+            case 'concert-this':
+                concertCheck(presetArray[1]);
+                break;
+            case 'spotify-this-song':
+                songCheck(presetArray[1]);
+                break;
+            case 'movie-this':
+                checkMovie(presetArray[1]);
+                break;
+            default:
+                console.log("Something is wrong with the Random.txt File");
+        }
+    })
+};
 
 
 // BONUS
@@ -118,10 +173,10 @@ switch (args[2]) {
         songCheck(args[3]);
         break;
     case 'movie-this':
-        // run movie function
+        checkMovie(args[3]);
         break;
     case 'do-what-it-says':
-        // run preset/reandom.txt function
+        checkPreset();
         break;
     default:
         console.log("Sorry, I didn't catch what you said.\r\nPlease enter one of the following commands instead:\r\nconcert-this '<artist/band name here>'\r\nspotify-this-song '<song name here>'\r\nmovie-this '<movie name here>'\r\ndo-what-it-says")
