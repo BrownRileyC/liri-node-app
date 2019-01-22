@@ -21,26 +21,22 @@ var args = process.argv;
 var concertCheck = function (band) {
     band = band.replace(/ /g, '+')
     band = band.replace(/"/g, "")
-    console.log(band);
     var axiosURL = "https://rest.bandsintown.com/artists/" + band + "/events?app_id=codingbootcamp";
-    console.log(axiosURL);
     axios
         .get(axiosURL)
         .then(function (response) {
             var events = response.data
-            if (events.length > 1){
-            console.log('We found ' + events.length + ' events');
-            } else {
-                console.log('We found ' + events.length + ' event');
-            };
             for (var i = 0; i < events.length; i++) {
-                console.log('Venue name: ' + events[i].venue.name);
-                console.log('Venue Location: ' + events[i].venue.city);
                 var dateString = moment(JSON.stringify(events[i].datetime), 'YYYY-MM-DDTHH:mm:ss');
-                var displayString = dateString.format('MM/DD/YYYY')
-                console.log('Event date: ' + displayString);
-                console.log("===============================================")
-            }
+                var displayString = dateString.format('MM/DD/YYYY');
+                console.log('Venue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================');
+                fs.appendFile('log.txt', 'Venue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================\r\n', function (error) {
+                    if (error) {
+                        console.log(error);
+                    };
+                    console.log('log.txt updated');
+                });
+            };
         })
         .catch(function (error) {
             if (error.response) {
@@ -73,20 +69,29 @@ var songCheck = function (song) {
             for (var i = 0; i < tracks.items.length; i++) {
                 var artistArray = [];
                 if (JSON.stringify(tracks.items[i].name) == '"' + song + '"') {
-                    console.log('The title of that track is: ' + tracks.items[i].name);
-                    console.log('We found it on the album: ' + tracks.items[i].album.name);
                     for (var j = 0; j < tracks.items[i].album.artists.length; j++) {
                         console.log(tracks.items[i].album.artists[j].name);
                         artistArray.push(JSON.stringify(tracks.items[i].album.artists[j].name));
-                    }
-                    console.log('That album featured: ' + artistArray);
+                    };
+
                     if (tracks.items[i].preview_url === null) {
-                        console.log("Sorry, we don't have a preview clip of this song for you :(");
+                        console.log('The title of that track is: ' + tracks.items[i].name + '\r\nWe found it on the album: ' + tracks.items[i].album.name + '\r\nThat album featured: ' + artistArray + "\r\nSorry, we don't have a preview clip of this song for you :(\r\n===============================================\r\n");
+                        fs.appendFile('log.txt', 'The title of that track is: ' + tracks.items[i].name + '\r\nWe found it on the album: ' + tracks.items[i].album.name + '\r\nThat album featured: ' + artistArray + "\r\nSorry, we don't have a preview clip of this song for you :(\r\n===============================================\r\n", function (error) {
+                            if (error) {
+                                console.log(error);
+                            };
+                            console.log('log.txt updated');
+                        });
                     } else {
-                        console.log("Here's a link to a preview of the song: " + tracks.items[i].preview_url);
+                        console.log('The title of that track is: ' + tracks.items[i].name + '\r\nWe found it on the album: ' + tracks.items[i].album.name + '\r\nThat album featured: ' + artistArray + "\r\nHere's a link to a preview of the song: " + tracks.items[i].preview_url + "\r\n===============================================\r\n");
+                        fs.appendFile('log.txt', 'The title of that track is: ' + tracks.items[i].name + '\r\nWe found it on the album: ' + tracks.items[i].album.name + '\r\nThat album featured: ' + artistArray + "\r\nHere's a link to a preview of the song: " + tracks.items[i].preview_url + "\r\n===============================================\r\n", function (error) {
+                            if (error) {
+                                console.log(error);
+                            };
+                            console.log('log.txt updated');
+                        });
                     }
-                    console.log("===============================================")
-                } 
+                }
             };
         })
         .catch(function (error) {
@@ -115,9 +120,14 @@ var checkMovie = function (movie) {
         .get(axiosURL)
         .then(function (response) {
             var data = response.data;
-            console.log(data.Title);
-            console.log("Released in " + data.Released + "\r\nRated " + data.imdbRating + " on imdb\r\nand " + data.Ratings[1].Value + " from Rotten Tomatoes\r\nThe film is from " + data.Country + " and is in " + data.Language + "\r\n" + data.Plot + "\r\nIt features " + data.Actors);
-            console.log(data.Ratings)
+            console.log(data.Title + "\r\nReleased in " + data.Released + "\r\nRated " + data.imdbRating + " on imdb\r\nand " + data.Ratings[1].Value + " from Rotten Tomatoes\r\nThe film is from " + data.Country + " and is in " + data.Language + "\r\n" + data.Plot + "\r\nIt features " + data.Actors);
+
+            fs.appendFile('log.txt', data.Title + "\r\nReleased in " + data.Released + "\r\nRated " + data.imdbRating + " on imdb\r\nand " + data.Ratings[1].Value + " from Rotten Tomatoes\r\nThe film is from " + data.Country + " and is in " + data.Language + "\r\n" + data.Plot + "\r\nIt features " + data.Actors + '\r\n===============================================\r\n', function (error) {
+                if (error) {
+                    console.log(error);
+                };
+                console.log('log.txt updated');
+            });
         })
         .catch(function (error) {
             if (error.response) {
@@ -144,7 +154,7 @@ var checkPreset = function () {
         }
         var presetArray = data.split(', ');
 
-        console.log(presetArray[0]==='spotify-this-song');
+        console.log(presetArray[0] === 'spotify-this-song');
         switch (presetArray[0]) {
             case 'concert-this':
                 concertCheck(presetArray[1]);
