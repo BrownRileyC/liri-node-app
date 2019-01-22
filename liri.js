@@ -25,13 +25,13 @@ var concertCheck = function (band) {
         .get(axiosURL)
         .then(function (response) {
             var events = response.data
-            console.log('There are '+events.length+ ' events found');
+            console.log('There are ' + events.length + ' events found');
             for (var i = 0; i < events.length; i++) {
-                console.log('Venue name: '+events[i].venue.name);
-                console.log('Venue Location: '+events[i].venue.city);
+                console.log('Venue name: ' + events[i].venue.name);
+                console.log('Venue Location: ' + events[i].venue.city);
                 var dateString = moment(JSON.stringify(events[i].datetime), 'YYYY-MM-DDTHH:mm:ss');
                 var displayString = dateString.format('MM/DD/YYYY')
-                console.log('Event date: '+displayString);
+                console.log('Event date: ' + displayString);
             }
         })
         .catch(function (error) {
@@ -52,7 +52,47 @@ var concertCheck = function (band) {
 // NODE-SPOTIFY-API
 // Return Artist(s), Song name, A preview Link from Spotify, and Album the song is from.  If no info found provide a default response
 
+var songCheck = function (song) {
+    spotify
+        .search({
+            type: 'track',
+            query: song
+        })
+        .then(function (response) {
 
+            var tracks = response.tracks;
+
+            for (var i = 0; i < tracks.items.length; i++) {
+                var artistArray = [];
+                if (JSON.stringify(tracks.items[i].name) == '"' + song + '"') {
+                    console.log('The title of that track is: ' + tracks.items[i].name);
+                    console.log('We found it on the album: ' + tracks.items[i].album.name);
+                    for (var j = 0; j < tracks.items[i].album.artists.length; j++) {
+                        console.log(tracks.items[i].album.artists[j].name);
+                        artistArray.push(JSON.stringify(tracks.items[i].album.artists[j].name));
+                    }
+                    console.log('That album featured: ' + artistArray);
+                    if (tracks.items[i].preview_url === null) {
+                        console.log("Sorry, we don't have a preview clip of this song for you :(");
+                    } else {
+                        console.log("Here's a link to a preview of the song: " + tracks.items[i].preview_url);
+                    }
+                }
+            };
+        })
+        .catch(function (error) {
+            if (error.response) {
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            } else if (error.request) {
+                console.log(error.request);
+            } else {
+                console.log("Error", error.message);
+            }
+            console.log(error.config);
+        });
+}
 
 //  movie-this '<movie name here>'
 // AXIOS
@@ -75,7 +115,7 @@ switch (args[2]) {
         concertCheck(args[3]);
         break;
     case 'spotify-this-song':
-        // run spotify function
+        songCheck(args[3]);
         break;
     case 'movie-this':
         // run movie function
