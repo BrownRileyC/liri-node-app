@@ -61,6 +61,7 @@ var concertCheck = function (band) {
 // Return Artist(s), Song name, A preview Link from Spotify, and Album the song is from.  If no info found provide a default response
 
 var songCheck = function (song) {
+    song = song.toLowerCase();
     spotify
         .search({
             type: 'track',
@@ -71,7 +72,7 @@ var songCheck = function (song) {
             if (tracks.items.length > 0) {
                 for (var i = 0; i < tracks.items.length; i++) {
                     var artistArray = [];
-                    if (JSON.stringify(tracks.items[i].name) == '"' + song + '"') {
+                    if (JSON.stringify(tracks.items[i].name).toLowerCase() == '"' + song + '"') {
                         for (var j = 0; j < tracks.items[i].album.artists.length; j++) {
                             artistArray.push(JSON.stringify(tracks.items[i].album.artists[j].name));
                         };
