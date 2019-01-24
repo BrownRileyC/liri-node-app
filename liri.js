@@ -13,7 +13,6 @@ var args = process.argv;
 
 // Commands TODO
 
-
 //  concert-this '<artist/band name here>'
 // AXIOS
 // Search Bands in Town Artist Events API and return Name of Venue, Venue Location, and Date of Event (in moment format MM/DD/YYYY)
@@ -25,15 +24,15 @@ var concertCheck = function (band) {
     axios
         .get(axiosURL)
         .then(function (response) {
-            var events = response.data            
-            if (!events[0].venue) {
+            var events = response.data
+            if (events.length === 0 || !events[0].venue) {
                 console.log("It seems like " + band + " didn't find anything, try another one")
             } else {
                 for (var i = 0; i < events.length; i++) {
                     var dateString = moment(JSON.stringify(events[i].datetime), 'YYYY-MM-DDTHH:mm:ss');
                     var displayString = dateString.format('MM/DD/YYYY');
-                    console.log('Venue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================');
-                    fs.appendFile('log.txt', 'Venue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================\r\n', function (error) {
+                    console.log('Artist Name: ' + band + '\r\nVenue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================');
+                    fs.appendFile('log.txt', 'Artist Name: ' + band + '\r\nVenue name: ' + events[i].venue.name + '\r\nVenue Location: ' + events[i].venue.city + '\r\nEvent date: ' + displayString + '\r\n===============================================\r\n', function (error) {
                         if (error) {
                             console.log(error);
                         };
@@ -163,8 +162,6 @@ var checkPreset = function () {
             console.log(error);
         }
         var presetArray = data.split(', ');
-
-        console.log(presetArray[0] === 'spotify-this-song');
         switch (presetArray[0]) {
             case 'concert-this':
                 concertCheck(presetArray[1]);
