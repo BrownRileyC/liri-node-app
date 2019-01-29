@@ -10,6 +10,7 @@ var spotify = new Spotify(keys.spotify);
 
 var args = process.argv;
 
+var logCounter = 0;
 
 // Commands TODO
 
@@ -26,7 +27,7 @@ var concertCheck = function (band) {
         .then(function (response) {
             var events = response.data
             if (events.length === 0 || !events[0].venue) {
-                console.log("It seems like " + band + " didn't find anything, try another one")
+                console.log("It seems like " + band + " didn't find anything, try another name.")
             } else {
                 for (var i = 0; i < events.length; i++) {
                     var dateString = moment(JSON.stringify(events[i].datetime), 'YYYY-MM-DDTHH:mm:ss');
@@ -36,7 +37,10 @@ var concertCheck = function (band) {
                         if (error) {
                             console.log(error);
                         };
-                        console.log('log.txt updated');
+                        if (logCounter === 0){
+                            console.log('log.txt updated');
+                            logCounter++;
+                            }
                     });
                 };
             }
@@ -82,7 +86,10 @@ var songCheck = function (song) {
                                 if (error) {
                                     console.log(error);
                                 };
-                                console.log('log.txt updated');
+                                if (logCounter === 0){
+                                    console.log('log.txt updated');
+                                    logCounter++;
+                                    }
                             });
                         } else {
                             console.log('The title of that track is: ' + tracks.items[i].name + '\r\nWe found it on the album: ' + tracks.items[i].album.name + '\r\nThat album featured: ' + artistArray + "\r\nHere's a link to a preview of the song: " + tracks.items[i].preview_url + "\r\n===============================================\r\n");
@@ -90,13 +97,17 @@ var songCheck = function (song) {
                                 if (error) {
                                     console.log(error);
                                 };
-                                console.log('log.txt updated');
+                                if (logCounter === 0){
+                                    console.log('log.txt updated');
+                                    logCounter++;
+                                    }
                             });
+                           
                         }
                     }
                 };
             } else {
-                console.log("It seems like " + song + " didn't find anything, try another one");
+                console.log("It seems like " + song + " didn't find anything, try another title.");
             }
         })
         .catch(function (error) {
@@ -125,7 +136,7 @@ var checkMovie = function (movie) {
         .get(axiosURL)
         .then(function (response) {
             if (response.data.response === false) {
-                console.log("It looks like " + movie + " didn't find anything, try another one");
+                console.log("It looks like " + movie + " didn't find anything, try another title.");
             } else {
                 var data = response.data;
                 console.log(data.Title + "\r\nReleased in " + data.Released + "\r\nRated " + data.imdbRating + " on imdb\r\nand " + data.Ratings[1].Value + " from Rotten Tomatoes\r\nThe film is from " + data.Country + " and is in " + data.Language + "\r\n" + data.Plot + "\r\nIt features " + data.Actors);
@@ -134,7 +145,10 @@ var checkMovie = function (movie) {
                     if (error) {
                         console.log(error);
                     };
-                    console.log('log.txt updated');
+                    if (logCounter === 0){
+                        console.log('log.txt updated');
+                        logCounter++;
+                        }
                 });
             };
         })
@@ -183,7 +197,7 @@ var checkPreset = function () {
 // Have the data log itself into the log.txt file (APPEND_FILE)
 
 if (args.length > 3) {
-    switch (args[2]) {
+    switch (args[2].toLowerCase()) {
         case 'concert-this':
             concertCheck(args[3]);
             break;
@@ -200,7 +214,7 @@ if (args.length > 3) {
             console.log("Sorry, I didn't catch what you said.\r\nPlease enter one of the following commands instead:\r\nconcert-this '<artist/band name here>'\r\nspotify-this-song '<song name here>'\r\nmovie-this '<movie name here>'\r\ndo-what-it-says")
     }
 } else {
-    switch (args[2]) {
+    switch (args[2].toLowerCase()) {
         case 'concert-this':
             console.log('It seems you forgot to enter a band or artist, please try again using this format\r\nconcert-this "<artist/band name here>"')
             break;
